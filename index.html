@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUDOKU LITE</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+    <div id="menu">
+        <button onclick="startGame('easy')">Fácil</button>
+        <button onclick="startGame('medium')">Médio</button>
+        <button onclick="startGame('hard')">Difícil</button>
+        <button onclick="startGame('hardcore')">Hardcore</button>
+        <button onclick="toggleTheme()">Alternar Tema</button>
+    </div>
+
+    <div id="hud">
+        <span><strong>Tempo:</strong> <span id="timer">00:00</span></span>
+        <span><strong>Pontuação:</strong> <span id="score">100</span></span>
+        <span><strong>Erros:</strong> <span id="errors">0</span></span>
+        <button onclick="goToMenu()">Voltar ao Menu</button>
+    </div>
+
+    <div id="root"></div>
+    <div id="number-buttons"></div>
+
+    <audio id="win-sound" src="https://cdn.pixabay.com/audio/2022/08/04/audio_f9ee2d0549.mp3"></audio>
+    <audio id="fail-sound" src="https://cdn.pixabay.com/audio/2022/03/17/audio_419b89caa8.mp3"></audio>
+
+</body>
+
+</html>
