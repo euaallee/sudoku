@@ -8,6 +8,12 @@ body {
     font-family: sans-serif;
     background-color: var(--bg);
     color: var(--text);
+
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 :root {
@@ -50,7 +56,6 @@ body.dark {
 }
 
 #root {
-    width: 100vw;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -96,12 +101,22 @@ body.dark {
 }
 
 @media (max-width: 600px) {
-    #hud {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
     #root {
-        transform: scale(0.85);
+        transform: scale(.8);
+        height: 70vh;
+    }
+}
+
+@media (max-width: 480px) {
+    #root {
+        transform: scale(.7);
+        height: 60vh;
+    }
+}
+
+@media (max-width: 420px) {
+    #root {
+        transform: scale(.6);
+        /* height: 10vh; */
     }
 }
