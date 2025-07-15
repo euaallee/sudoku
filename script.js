@@ -316,8 +316,6 @@ function startGame(difficultyKey) {
 }
 
 /* ----------------- Eventos globais ----------------- */
-// Botões no menu (já estão com inline onclick no seu HTML)
-// Botão "Alternar Tema" também já usa inline onclick no HTML
 
 // Pressionar Backspace/Delete remove número se não for fixo
 window.addEventListener("keydown", e => {
