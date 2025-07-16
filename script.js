@@ -147,8 +147,9 @@ function creatSmallBlock(parent, row, col, value) {
 
 function creatBlock(parent, blockIndex, puzzle) {
     const block = document.createElement("div");
-    block.style.border = "1px solid #575757";
-    block.style.display = "grid";
+    block.style.border = "2px solid #000000ff";
+    block.style.display = "inline-grid";
+    block.style.placeSelf = "anchor-center"
     block.style.gridTemplateColumns = "repeat(3, 66px)";
     block.style.gridTemplateRows = "repeat(3, 66px)";
     parent.append(block);

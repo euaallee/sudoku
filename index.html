@@ -22,17 +22,19 @@
         <button onclick="startGame('hard')">Difícil</button>
     </div>
 
-    <div id="hud">
-        <span><strong>Tempo:</strong> <span id="timer">00:00</span></span>
-        <span><strong>Pontuação:</strong> <span id="score">100</span></span>
-        <span><strong>Erros:</strong> <span id="errors">0</span></span>
-        <button class="home" onclick="goToMenu()" title="Voltar ao menu">
-            <i data-lucide="home"></i>
-        </button>
-    </div>
 
-    <div id="root"></div>
-    <div id="number-buttons"></div>
+    <div class="game">
+        <div id="hud">
+            <span><strong>Tempo:</strong> <span id="timer">00:00</span></span>
+            <span><strong>Pontuação:</strong> <span id="score">100</span></span>
+            <span><strong>Erros:</strong> <span id="errors">0</span></span>
+            <button class="home" onclick="goToMenu()" title="Voltar ao menu">
+                <i data-lucide="home"></i>
+            </button>
+        </div>
+        <div id="root"></div>
+        <div id="number-buttons"></div>
+    </div>
 
     <audio id="win-sound" src="./sound/GameWin.mp3"></audio>
     <audio id="fail-sound" src="./sound/GameOver.mp3"></audio>
