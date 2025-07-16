@@ -1,5 +1,9 @@
+/* -------------------Importações----------------------- */
+
+
 /* ----------------- Variáveis e constantes ----------------- */
 const root = document.querySelector("#root");
+const btnTgTheme = document.querySelector("#tgTheme")
 const SIZE = 9;
 const TOTAL_BLOCK = 9;
 
@@ -17,7 +21,6 @@ let solution = [];
 let selectedCell = null;
 let errors = 0;
 let maxErrors = 5;
-
 /* ----------------- Utilidades gerais ----------------- */
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -122,7 +125,8 @@ function generateSudokuBoard(holes = 40) {
 function creatSmallBlock(parent, row, col, value) {
     const cell = document.createElement("div");
     cell.classList.add("select-block");
-    cell.style.border = "1px solid #b1b1b1";
+    cell.style.border = "1px solid #444444ff";
+    //cell.style.backgroundColor = "#fddbb4";
     cell.style.height = "66px";
     cell.style.width = "66px";
     cell.dataset.row = row;
@@ -281,7 +285,15 @@ function checkVictory() {
 
 /* ----------------- Tema claro/escuro ----------------- */
 function toggleTheme() {
-    document.body.classList.toggle("dark");
+    const isDark = document.body.classList.toggle("dark");
+    btnTgTheme.innerHTML = "";
+
+    const icon = document.createElement("i");
+    icon.setAttribute("data-lucide", isDark ? "sun" : "moon");
+    icon.style.color = isDark ? "white" : "black"
+    btnTgTheme.appendChild(icon)
+
+    lucide.createIcons();
 }
 
 /* ----------------- Menu & HUD ----------------- */
@@ -291,9 +303,16 @@ function goToMenu() {
     document.getElementById("number-buttons").innerHTML = "";
     document.getElementById("menu").style.display = "flex";
     document.getElementById("hud").style.display = "none";
+    document.getElementById("root").style.display = "none";
 }
 
+document.getElementById("btnStart").addEventListener("click", () => {
+    document.getElementById("difficultyModal").style.display = "flex";
+});
+
 function startGame(difficultyKey) {
+    document.getElementById("difficultyModal").style.display = "none";
+
     // guarda limites conforme dificuldade
     const { holes, maxErrors: me } = DIFFICULTIES[difficultyKey];
     maxErrors = me;
@@ -307,6 +326,7 @@ function startGame(difficultyKey) {
     // UI: esconde menu, mostra HUD
     document.getElementById("menu").style.display = "none";
     document.getElementById("hud").style.display = "flex";
+    document.getElementById("root").style.display = "block";
 
     // Gera puzzle e cria tabuleiro
     const puzzle = generateSudokuBoard(holes);
