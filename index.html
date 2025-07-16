@@ -12,6 +12,15 @@
 </head>
 
 <body>
+    <div id="authModal" class="modal">
+        <h2>Entrar ou Cadastrar</h2>
+        <input type="email" id="email" placeholder="Email" />
+        <input type="password" id="password" placeholder="Senha" />
+        <button onclick="handleLogin()">Entrar</button>
+        <button onclick="handleRegister()">Cadastrar</button>
+    </div>
+
+
     <div id="menu">
         <button id="btnStart">Iniciar Jogo</button>
         <p id="highScoreDisplay">Maior pontuação: 0</p>
@@ -25,7 +34,6 @@
         <button onclick="startGame('hard')">Difícil</button>
     </div>
 
-
     <div class="game">
         <div id="hud">
             <span><strong>Tempo:</strong> <span id="timer">00:00</span></span>
@@ -38,7 +46,6 @@
         <div id="root"></div>
         <div id="number-buttons"></div>
     </div>
-
 </body>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>

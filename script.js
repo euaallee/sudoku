@@ -36,6 +36,74 @@ function updateHighScoreDisplay() {
     document.getElementById("highScoreDisplay").textContent = `Maior pontuação: ${highScore}`;
 }
 
+// Sistema de Register/Login
+
+const API_URL = "http://localhost:3000/api"; // ou seu backend hospedado
+let currentUser = null;
+let accessToken = localStorage.getItem("token");
+
+// Exibe HUD com nome se já logado
+if (accessToken) getUser();
+
+async function handleRegister() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const res = await fetch(`${API_URL}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    alert(data.message || data.error);
+}
+
+async function handleLogin() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const res = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+
+    if (data.session?.access_token) {
+        accessToken = data.session.access_token;
+        localStorage.setItem("token", accessToken);
+        currentUser = data.session.user.email;
+        document.getElementById("authModal").style.display = "none";
+        updateHUDUser();
+    } else {
+        alert(data.error);
+    }
+}
+
+async function getUser() {
+    const res = await fetch("https://YOUR_PROJECT.supabase.co/auth/v1/user", {
+        headers: { Authorization: `Bearer ${accessToken}` }
+    });
+    const data = await res.json();
+    if (data?.email) {
+        currentUser = data.email;
+        document.getElementById("authModal").style.display = "none";
+        updateHUDUser();
+    }
+}
+
+function updateHUDUser() {
+    const hud = document.getElementById("hud");
+    let userLabel = document.getElementById("userLabel");
+    if (!userLabel) {
+        userLabel = document.createElement("span");
+        userLabel.id = "userLabel";
+        hud.insertBefore(userLabel, hud.firstChild);
+    }
+    userLabel.innerHTML = `<strong>Usuário:</strong> ${currentUser}`;
+}
+
+
 /* ----------------- Timer ----------------- */
 function startTimer() {
     clearInterval(timerInterval);
@@ -309,6 +377,19 @@ function checkVictory() {
         localStorage.setItem("sudokuHighScore", highScore);
         updateHighScoreDisplay();
     }
+    if (accessToken) {
+        fetch(`${API_URL}/score`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({ points: score, timeInSeconds: seconds })
+        }).then(res => res.json()).then(data => {
+            console.log("Pontuação enviada:", data);
+        });
+    }
+
     document.getElementById("win-sound").play();
     setTimeout(() => alert("✨ Parabéns! Você completou o Sudoku! ✨"), 100);
     setTimeout(goToMenu, 200);
