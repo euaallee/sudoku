@@ -7,11 +7,14 @@
     <title>SUDOKU LITE</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
+    <audio id="win-sound" src="./sound/GameWin.mp3"></audio>
+    <audio id="fail-sound" src="./sound/GameOver.mp3"></audio>
 </head>
 
 <body>
     <div id="menu">
         <button id="btnStart">Iniciar Jogo</button>
+        <p id="highScoreDisplay">Maior pontuação: 0</p>
         <button id="tgTheme" onclick="toggleTheme()"><i data-lucide="moon"></i></button>
     </div>
 
@@ -28,16 +31,13 @@
             <span><strong>Tempo:</strong> <span id="timer">00:00</span></span>
             <span><strong>Pontuação:</strong> <span id="score">100</span></span>
             <span><strong>Erros:</strong> <span id="errors">0</span></span>
-            <button class="home" onclick="goToMenu()" title="Voltar ao menu">
+            <button id="home" onclick="goToMenu()" title="Voltar ao menu">
                 <i data-lucide="home"></i>
             </button>
         </div>
         <div id="root"></div>
         <div id="number-buttons"></div>
     </div>
-
-    <audio id="win-sound" src="./sound/GameWin.mp3"></audio>
-    <audio id="fail-sound" src="./sound/GameOver.mp3"></audio>
 
 </body>
 <script src="https://unpkg.com/lucide@latest"></script>

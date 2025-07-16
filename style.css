@@ -60,10 +60,17 @@ body.dark {
     background-color: #0056b3;
 }
 
-#tgTheme, .home {
+#tgTheme {
     position: absolute;
     bottom: 20px;
     right: 20px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+#home {
     background: transparent;
     border: none;
     font-size: 24px;

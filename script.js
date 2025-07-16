@@ -21,6 +21,8 @@ let solution = [];
 let selectedCell = null;
 let errors = 0;
 let maxErrors = 5;
+let userInputs = {};
+let highScore = localStorage.getItem("sudokuHighScore") || 0;
 /* ----------------- Utilidades gerais ----------------- */
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -28,6 +30,10 @@ function shuffle(array) {
         [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
+}
+
+function updateHighScoreDisplay() {
+    document.getElementById("highScoreDisplay").textContent = `Maior pontuação: ${highScore}`;
 }
 
 /* ----------------- Timer ----------------- */
@@ -207,20 +213,39 @@ function handleNumberClick(num) {
 
     const row = +selectedCell.dataset.row;
     const col = +selectedCell.dataset.col;
+    const key = `${row}-${col}`;
+    const current = parseInt(selectedCell.textContent);
 
+    // Se já está correto, não faz nada
+    if (current === solution[row][col]) return;
+
+    // Resposta correta
     if (num === solution[row][col]) {
         selectedCell.textContent = num;
         selectedCell.style.color = "blue";
+
+        // Remove erro anterior se houver
+        if (userInputs[key]?.wasWrong) {
+            // (não desconta ponto aqui, só remove marca de erro)
+            delete userInputs[key];
+        }
+
         updateScore(10 - Math.floor(seconds / 30));
         checkFullLinesAndBlocks();
         checkVictory();
         checkUsedNumbers();
     } else {
+        // Evita contar erro duplicado na mesma célula
+        if (userInputs[key]?.wasWrong) return;
+
         selectedCell.textContent = num;
         selectedCell.style.color = "red";
         updateScore(-5);
         errors++;
         updateErrors();
+
+        // Marca que essa célula já teve erro
+        userInputs[key] = { wasWrong: true };
     }
 }
 
@@ -279,6 +304,11 @@ function checkVictory() {
         if (!cell.classList.contains("fixed") && parseInt(cell.textContent) !== expected) return;
     }
     stopTimer();
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("sudokuHighScore", highScore);
+        updateHighScoreDisplay();
+    }
     document.getElementById("win-sound").play();
     setTimeout(() => alert("✨ Parabéns! Você completou o Sudoku! ✨"), 100);
     setTimeout(goToMenu, 200);
@@ -287,12 +317,14 @@ function checkVictory() {
 /* ----------------- Tema claro/escuro ----------------- */
 function toggleTheme() {
     const isDark = document.body.classList.toggle("dark");
+    document.querySelector("#home").setAttribute("style", isDark ? "color: white" : "color: black");
     btnTgTheme.innerHTML = "";
 
     const icon = document.createElement("i");
     icon.setAttribute("data-lucide", isDark ? "sun" : "moon");
     icon.style.color = isDark ? "white" : "black"
     btnTgTheme.appendChild(icon)
+
 
     lucide.createIcons();
 }
@@ -321,6 +353,7 @@ function startGame(difficultyKey) {
     // estado inicial
     score = 100;
     errors = 0;
+    userInputs = {};
     updateScore(0);     // força atualizar HUD
     updateErrors();
 
@@ -345,4 +378,9 @@ window.addEventListener("keydown", e => {
         selectedCell.textContent = "";
         checkUsedNumbers();
     }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    updateHighScoreDisplay();
+    lucide.createIcons();
 });
