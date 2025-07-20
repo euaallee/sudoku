@@ -1,8 +1,9 @@
+// Mostra o formulário de nome ao carregar
 document.getElementById("displayNameForm").style.display = "flex";
 
-/* ----------------- Variáveis e constantes ----------------- */
+/* ----------------- VARIÁVEIS GLOBAIS ----------------- */
 const root = document.querySelector("#root");
-const btnTgTheme = document.querySelector("#tgTheme")
+
 const SIZE = 9;
 const TOTAL_BLOCK = 9;
 
@@ -22,7 +23,9 @@ let errors = 0;
 let maxErrors = 5;
 let userInputs = {};
 let highScore = localStorage.getItem("sudokuHighScore") || 0;
-/* ----------------- Utilidades gerais ----------------- */
+let isDarkTheme = localStorage.getItem("theme") === "true";
+
+/* ----------------- UTILIDADES ----------------- */
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -35,16 +38,16 @@ async function updateHighScoreDisplay() {
     document.getElementById("highScoreDisplay").textContent = `${highScore}`;
 }
 
-// Sistema de Register/Login
-
+/* ----------------- AUTENTICAÇÃO ----------------- */
 const API_URL = "http://192.168.1.15:3000/api";
 let currentUser = localStorage.getItem("user");
 let accessToken = localStorage.getItem("token");
 let sessionId = localStorage.getItem("sessionId");
 
 async function handleRegister() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    if (!email || !password) return alert("Preencha todos os campos!");
 
     const res = await fetch(`${API_URL}/register`, {
         method: "POST",
@@ -56,8 +59,9 @@ async function handleRegister() {
 }
 
 async function handleLogin() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    if (!email || !password) return alert("Preencha todos os campos!");
 
     const res = await fetch(`${API_URL}/login`, {
         method: "POST",
@@ -66,7 +70,6 @@ async function handleLogin() {
     });
 
     const data = await res.json();
-
     if (data.session?.access_token) {
         accessToken = data.session.access_token;
         sessionId = data.user.id;
@@ -74,19 +77,18 @@ async function handleLogin() {
         localStorage.setItem("sessionId", sessionId);
 
         document.getElementById("authModal").style.display = "none";
-        document.querySelector(".sessionMenu").style.display = "flex"
-        loadingInfoPlayer()
+        document.querySelector(".sessionMenu").style.display = "flex";
+        loadingInfoPlayer();
         updateHUDUser();
         loadRanking();
     } else {
-        console.error("Erro na resposta de login:", data);
         alert(data.error || "Erro ao logar");
     }
-
 }
 
 async function setDisplayName() {
-    const name = document.getElementById("displayNameInput").value;
+    const name = document.getElementById("displayNameInput").value.trim();
+    if (!name) return alert("Digite um nome!");
 
     const res = await fetch(`${API_URL}/player`, {
         method: "POST",
@@ -99,9 +101,9 @@ async function setDisplayName() {
 
     const data = await res.json();
     alert(data.message || data.error);
-    loadingInfoPlayer()
+    loadingInfoPlayer();
     updateHUDUser();
-    loadRanking(); // Atualiza o ranking depois
+    loadRanking();
 }
 
 async function loadingInfoPlayer() {
@@ -114,49 +116,37 @@ async function loadingInfoPlayer() {
     });
 
     const data = await res.json();
-    data.map(item => {
+    data.forEach(item => {
         if (item.id === sessionId) {
             currentUser = item.usuario || "Desconhecido";
             localStorage.setItem("user", currentUser);
         }
-    })
-
+    });
 }
 
 function updateHUDUser() {
     const hud = document.getElementById("hud");
     let userLabel = document.getElementById("userLabel");
-
     if (!userLabel) {
         userLabel = document.createElement("span");
         userLabel.id = "userLabel";
         hud.insertBefore(userLabel, hud.firstChild);
     }
-
     userLabel.innerHTML = `<strong>Usuário:</strong> ${currentUser}`;
     document.getElementById("displayNameForm").style.display = "block";
 }
 
-
 async function loadRanking() {
     const res = await fetch(`${API_URL}/ranking`);
     const data = await res.json();
-
-    if (!Array.isArray(data)) {
-        console.error("Erro ao carregar ranking:", data);
-        return;
-    }
+    if (!Array.isArray(data)) return;
 
     const list = document.getElementById("rankingList");
     list.innerHTML = "";
-
     data.forEach((item, i) => {
         list.innerHTML += `<li>#${i + 1} ${item.username || item.email} - ${item.points} pts - ${item.time}s</li>`;
     });
 }
-
-
-document.addEventListener("DOMContentLoaded", loadRanking);
 
 function logout() {
     accessToken = null;
@@ -167,9 +157,8 @@ function logout() {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
 
-    // Esconde HUD, mostra modal de login
     document.getElementById("authModal").style.display = "flex";
-    document.querySelector(".sessionMenu").style.display = "none"
+    document.querySelector(".sessionMenu").style.display = "none";
 
     const label = document.getElementById("userLabel");
     if (label) label.remove();
@@ -177,7 +166,7 @@ function logout() {
     alert("Você saiu da conta.");
 }
 
-/* ----------------- Timer ----------------- */
+/* ----------------- TIMER ----------------- */
 function startTimer() {
     clearInterval(timerInterval);
     seconds = 0;
@@ -194,7 +183,7 @@ function stopTimer() {
     clearInterval(timerInterval);
 }
 
-/* ----------------- Pontuação & erros ----------------- */
+/* ----------------- PONTUAÇÃO & ERROS ----------------- */
 function updateScore(change = 0) {
     score += change;
     if (score < 0) score = 0;
@@ -212,7 +201,7 @@ function updateErrors() {
     }
 }
 
-/* ----------------- Sudoku – geração da solução e do puzzle ----------------- */
+/* ----------------- GERAÇÃO DE SUDOKU ----------------- */
 function generateSudokuBoard(holes = 40) {
     const board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
 
@@ -264,16 +253,15 @@ function generateSudokuBoard(holes = 40) {
     }
 
     fillBoard(board);
-    solution = board;                         // guarda solução global
-    return createPuzzle(board, holes);        // devolve puzzle com buracos
+    solution = board;
+    return createPuzzle(board, holes);
 }
 
-/* ----------------- Criação visual do tabuleiro ----------------- */
-function creatSmallBlock(parent, row, col, value) {
+/* ----------------- INTERFACE DO TABULEIRO ----------------- */
+function createSmallBlock(parent, row, col, value) {
     const cell = document.createElement("div");
     cell.classList.add("select-block");
-    cell.style.border = "1px solid #444444ff";
-    //cell.style.backgroundColor = "#fddbb4";
+    cell.style.border = "1px solid #444";
     cell.style.height = "66px";
     cell.style.width = "66px";
     cell.dataset.row = row;
@@ -288,15 +276,13 @@ function creatSmallBlock(parent, row, col, value) {
 
     cell.addEventListener("mouseover", () => highlightAxis(row, col, true));
     cell.addEventListener("mouseout", () => highlightAxis(row, col, false));
-
     parent.append(cell);
 }
 
-function creatBlock(parent, blockIndex, puzzle) {
+function createBlock(parent, blockIndex, puzzle) {
     const block = document.createElement("div");
-    block.style.border = "2px solid #000000ff";
+    block.style.border = "2px solid #000";
     block.style.display = "inline-grid";
-    block.style.placeSelf = "anchor-center"
     block.style.gridTemplateColumns = "repeat(3, 66px)";
     block.style.gridTemplateRows = "repeat(3, 66px)";
     parent.append(block);
@@ -305,28 +291,25 @@ function creatBlock(parent, blockIndex, puzzle) {
     const blockCol = blockIndex % 3;
 
     for (let i = 0; i < TOTAL_BLOCK; i++) {
-        const cellRowInBlock = Math.floor(i / 3);
-        const cellColInBlock = i % 3;
-        const row = blockRow * 3 + cellRowInBlock;
-        const col = blockCol * 3 + cellColInBlock;
+        const row = blockRow * 3 + Math.floor(i / 3);
+        const col = blockCol * 3 + i % 3;
         const value = puzzle[row][col];
-        creatSmallBlock(block, row, col, value);
+        createSmallBlock(block, row, col, value);
     }
 }
 
-function creatSquare(puzzle) {
+function createSquare(puzzle) {
     root.innerHTML = "";
     const square = document.createElement("div");
     square.style.border = "3px solid #000";
     square.style.display = "grid";
     square.style.gridTemplateColumns = "repeat(3, 200px)";
     square.style.gridTemplateRows = "repeat(3, 200px)";
-
-    for (let i = 0; i < TOTAL_BLOCK; i++) creatBlock(square, i, puzzle);
+    for (let i = 0; i < TOTAL_BLOCK; i++) createBlock(square, i, puzzle);
     root.append(square);
 }
 
-/* ----------------- Realce de linha/coluna ----------------- */
+/* ----------------- INTERAÇÕES E VERIFICAÇÕES ----------------- */
 function highlightAxis(row, col, enable) {
     document.querySelectorAll(".select-block").forEach(cell => {
         if (cell.dataset.row == row) cell.classList.toggle("highlight-y", enable);
@@ -334,7 +317,6 @@ function highlightAxis(row, col, enable) {
     });
 }
 
-/* ----------------- Botões de números ----------------- */
 function createNumberButtons() {
     const container = document.getElementById("number-buttons");
     container.innerHTML = "";
@@ -351,41 +333,28 @@ function createNumberButtons() {
 
 function handleNumberClick(num) {
     if (!selectedCell || selectedCell.classList.contains("fixed")) return;
-
     const row = +selectedCell.dataset.row;
     const col = +selectedCell.dataset.col;
     const key = `${row}-${col}`;
     const current = parseInt(selectedCell.textContent);
 
-    // Se já está correto, não faz nada
     if (current === solution[row][col]) return;
 
-    // Resposta correta
     if (num === solution[row][col]) {
         selectedCell.textContent = num;
         selectedCell.style.color = "blue";
-
-        // Remove erro anterior se houver
-        if (userInputs[key]?.wasWrong) {
-            // (não desconta ponto aqui, só remove marca de erro)
-            delete userInputs[key];
-        }
-
+        delete userInputs[key];
         updateScore(10 - Math.floor(seconds / 30));
         checkFullLinesAndBlocks();
         checkVictory();
         checkUsedNumbers();
     } else {
-        // Evita contar erro duplicado na mesma célula
         if (userInputs[key]?.wasWrong) return;
-
         selectedCell.textContent = num;
         selectedCell.style.color = "red";
         updateScore(-5);
         errors++;
         updateErrors();
-
-        // Marca que essa célula já teve erro
         userInputs[key] = { wasWrong: true };
     }
 }
@@ -398,29 +367,24 @@ function checkUsedNumbers() {
     });
     for (let i = 1; i <= 9; i++) {
         const btn = document.querySelector(`.num-btn[data-num='${i}']`);
-        if (!btn) continue;
-        btn.style.display = usedCount[i] >= 9 ? "none" : "inline-block";
+        if (btn) btn.style.display = usedCount[i] >= 9 ? "none" : "inline-block";
     }
 }
 
-/* ----------------- Regras extras de pontuação ----------------- */
 function checkFullLinesAndBlocks() {
-    const cells = document.querySelectorAll(".select-block");
     const grid = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
-    cells.forEach(cell => {
+    document.querySelectorAll(".select-block").forEach(cell => {
         const row = +cell.dataset.row;
         const col = +cell.dataset.col;
         const val = parseInt(cell.textContent);
         if (!isNaN(val)) grid[row][col] = val;
     });
 
-    // Linhas & colunas completas
     for (let i = 0; i < SIZE; i++) {
         if (grid[i].every((v, idx) => v === solution[i][idx])) updateScore(30);
         if (grid.every((row, idx) => row[i] === solution[idx][i])) updateScore(30);
     }
 
-    // Blocos 3x3 completos
     for (let block = 0; block < 9; block++) {
         const startRow = Math.floor(block / 3) * 3;
         const startCol = (block % 3) * 3;
@@ -428,7 +392,8 @@ function checkFullLinesAndBlocks() {
         for (let r = 0; r < 3 && correct; r++) {
             for (let c = 0; c < 3; c++) {
                 if (grid[startRow + r][startCol + c] !== solution[startRow + r][startCol + c]) {
-                    correct = false; break;
+                    correct = false;
+                    break;
                 }
             }
         }
@@ -436,7 +401,6 @@ function checkFullLinesAndBlocks() {
     }
 }
 
-/* ----------------- Verificação de vitória ----------------- */
 function checkVictory() {
     const cells = document.querySelectorAll(".select-block");
     for (const cell of cells) {
@@ -444,12 +408,14 @@ function checkVictory() {
         const expected = solution[+row][+col];
         if (!cell.classList.contains("fixed") && parseInt(cell.textContent) !== expected) return;
     }
+
     stopTimer();
     if (score > highScore) {
         highScore = score;
         localStorage.setItem("sudokuHighScore", highScore);
         updateHighScoreDisplay();
     }
+
     if (accessToken) {
         fetch(`${API_URL}/score`, {
             method: "POST",
@@ -458,8 +424,6 @@ function checkVictory() {
                 "Authorization": `Bearer ${accessToken}`
             },
             body: JSON.stringify({ points: score, timeInSeconds: seconds })
-        }).then(res => res.json()).then(data => {
-            console.log("Pontuação enviada:", data);
         });
     }
 
@@ -468,20 +432,25 @@ function checkVictory() {
     setTimeout(goToMenu, 200);
 }
 
-/* ----------------- Tema claro/escuro ----------------- */
+/* ----------------- TEMA CLARO/ESCURO ----------------- */
+const btnTgTheme = document.querySelector("#tgTheme");
+const icon = document.createElement("i");
+icon.setAttribute("data-lucide", isDarkTheme ? "sun" : "moon");
+btnTgTheme.appendChild(icon);
+
 function toggleTheme() {
     const isDark = document.body.classList.toggle("dark");
-    btnTgTheme.innerHTML = "";
+    localStorage.setItem("theme", isDark);
+    btnTgTheme.firstChild.remove();
 
     const icon = document.createElement("i");
     icon.setAttribute("data-lucide", isDark ? "sun" : "moon");
-    icon.style.color = isDark ? "white" : "black"
-    btnTgTheme.appendChild(icon)
 
+    btnTgTheme.append(icon);
     lucide.createIcons();
 }
 
-/* ----------------- Menu & HUD ----------------- */
+/* ----------------- MENU ----------------- */
 function goToMenu() {
     stopTimer();
     root.innerHTML = "";
@@ -489,7 +458,6 @@ function goToMenu() {
     document.querySelector(".sessionMenu").style.display = "flex";
     document.getElementById("hud").style.display = "none";
     document.getElementById("root").style.display = "none";
-
     loadRanking();
 }
 
@@ -499,34 +467,27 @@ document.getElementById("btnStart").addEventListener("click", () => {
 
 function startGame(difficultyKey) {
     document.querySelector(".difficultyModal").style.display = "none";
-    document.querySelector(".game").style.display = "flex"
+    document.querySelector(".game").style.display = "flex";
 
-    // guarda limites conforme dificuldade
     const { holes, maxErrors: me } = DIFFICULTIES[difficultyKey];
     maxErrors = me;
-
-    // estado inicial
     score = 100;
     errors = 0;
     userInputs = {};
-    updateScore(0);     // força atualizar HUD
+    updateScore(0);
     updateErrors();
 
-    // UI: esconde menu, mostra HUD
     document.querySelector(".sessionMenu").style.display = "none";
     document.getElementById("hud").style.display = "flex";
     document.getElementById("root").style.display = "block";
 
-    // Gera puzzle e cria tabuleiro
     const puzzle = generateSudokuBoard(holes);
-    creatSquare(puzzle);
+    createSquare(puzzle);
     createNumberButtons();
     startTimer();
 }
 
-/* ----------------- Eventos globais ----------------- */
-
-// Pressionar Backspace/Delete remove número se não for fixo
+/* ----------------- EVENTOS GLOBAIS ----------------- */
 window.addEventListener("keydown", e => {
     if (!selectedCell || selectedCell.classList.contains("fixed")) return;
     if (e.key === "Backspace" || e.key === "Delete") {
@@ -537,18 +498,18 @@ window.addEventListener("keydown", e => {
 
 const closeDifficultyModal = () => {
     document.querySelector(".difficultyModal").style.display = "none";
-}
+};
 
 document.addEventListener("DOMContentLoaded", () => {
     updateHighScoreDisplay();
     lucide.createIcons();
+    if (isDarkTheme) document.body.classList.add("dark");
 });
 
-accessToken = localStorage.getItem("token");
 if (accessToken) {
     document.getElementById("authModal").style.display = "none";
-    document.querySelector(".sessionMenu").style.display = "flex"
-    loadingInfoPlayer()
-    updateHUDUser()
+    document.querySelector(".sessionMenu").style.display = "flex";
+    loadingInfoPlayer();
+    updateHUDUser();
     loadRanking();
 }
