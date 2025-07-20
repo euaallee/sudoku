@@ -134,6 +134,7 @@ function updateHUDUser() {
     }
     userLabel.innerHTML = `<strong>Usuário:</strong> ${currentUser}`;
     document.getElementById("displayNameForm").style.display = "block";
+    loadingInfoPlayer()
 }
 
 async function loadRanking() {
