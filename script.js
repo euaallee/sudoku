@@ -144,7 +144,9 @@ async function loadRanking() {
     const list = document.getElementById("rankingList");
     list.innerHTML = "";
     data.forEach((item, i) => {
-        list.innerHTML += `<li>#${i + 1} ${item.username || item.email} - ${item.points} pts - ${item.time}s</li>`;
+        const minutes = Math.floor(item.time / 60);
+        const seconds = item.time % 60;
+        list.innerHTML += `<li>#${i + 1} ${item.username || item.email} - ${item.points} pts - ${minutes}min ${seconds}s</li>`;
     });
 }
 
@@ -456,8 +458,7 @@ function goToMenu() {
     root.innerHTML = "";
     document.getElementById("number-buttons").innerHTML = "";
     document.querySelector(".sessionMenu").style.display = "flex";
-    document.getElementById("hud").style.display = "none";
-    document.getElementById("root").style.display = "none";
+    document.querySelector(".game").style.display = "none";
     loadRanking();
 }
 
