@@ -130,7 +130,7 @@ function updateHUDUser() {
     if (!userLabel) {
         userLabel = document.createElement("span");
         userLabel.id = "userLabel";
-        hud.insertBefore(userLabel, hud.firstChild);
+        hud.insertBefore(userLabel, hud.secondChild);
     }
     userLabel.innerHTML = `<strong>Usuário:</strong> ${currentUser}`;
     document.getElementById("displayNameForm").style.display = "block";
