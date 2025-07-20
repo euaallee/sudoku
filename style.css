@@ -20,18 +20,23 @@ body {
 
 :root {
     --bg: #ffffff;
+    --bg2: #f0f0f0;
     --text: #000000;
 }
 
 body.dark {
     --bg: #121212;
+    --bg2: #242424;
     --text: #f0f0f0;
 }
 
+/* -------------- Modal de Registro e login --------------*/
 .modal {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    width: 320px;
+    height: 254px;
     padding: 30px;
     border-radius: 8px;
     background: var(--bg);
@@ -42,49 +47,157 @@ body.dark {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 999;
+
+    input {
+        border: none;
+        border-bottom: 1px solid;
+        padding: 3px 6px;
+        outline: none;
+        font-size: 20px;
+    }
+
+    button {
+        background-color: #007bff;
+        color: white;
+        padding: 5px 25px;
+        border: none;
+        border-radius: 10px;
+        font-size: 20px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
 }
 
-
-#menu {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+/*------------- Menu principal ------------*/
+.sessionMenu {
+    background-color: var(--bg2);
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
-}
 
-#menu button {
-    padding: 10px 20px;
-    font-size: 18px;
-    border-radius: 6px;
-    cursor: pointer;
-}
+    .leftMenu {
+        display: flex;
 
-#btnStart {
-    background-color: #007bff;
-    color: white;
-    padding: 15px 30px;
-    border: none;
-    border-radius: 10px;
-    font-size: 20px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
+        #menu {
+            height: 100vh;
+            width: 350px;
+            background-color: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            border-radius: 0 8px 8px 0;
 
-#btnStart:hover {
-    background-color: #0056b3;
-}
+            #tgTheme {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                background: transparent;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+            }
 
-#tgTheme {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background: transparent;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
+            #displayNameForm {
+                display: none;
+                margin-top: 20px;
+                text-align: center;
+                border: 1px var(--text) solid;
+                border-radius: 8px;
+                overflow: hidden;
+
+                input {
+                    padding: 10px 5px;
+                    border: none;
+                    background-color: var(--bg);
+                    color: var(--text);
+
+                    &::placeholder {
+                        color: var(--text);
+                    }
+                }
+
+                button {
+                    border: none;
+                    background-color: var(--bg);
+                    border-left: 1px var(--bg2) solid;
+                    border-radius: 0;
+                    padding: 10px 20px;
+                    color: var(--text);
+                    cursor: pointer;
+                }
+            }
+
+            #btnStart {
+                background-color: #007bff;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 10px;
+                font-size: 20px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+
+                &:hover {
+                    background-color: #0056b3;
+                }
+            }
+
+            .logout {
+                position: absolute;
+                bottom: 20px;
+                left: 20px;
+                background: transparent;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                color: var(--text);
+            }
+        }
+
+        .highScoreDisplay {
+            margin: 5px 20px;
+            align-self: self-start;
+            background-color: var(--bg);
+            padding: 4px;
+            border: 1px solid rgb(124, 124, 124);
+            border-radius: 8px;
+            color: var(--text);
+
+            &::before {
+                content: "Maior pontuação: ";
+            }
+        }
+    }
+
+    .rigthMenu {
+        display: flex;
+        height: 100vh;
+
+        #ranking {
+            margin: 20px;
+            width: auto;
+            height: auto;
+            align-self: self-start;
+            justify-items: center;
+            text-align: center;
+            color: var(--text);
+
+            #rankingList {
+                list-style: none;
+                padding: 0;
+
+                li {
+                    margin: 5px 0;
+                    font-weight: bold;
+                }
+            }
+        }
+    }
 }
 
 #home {
@@ -94,35 +207,52 @@ body.dark {
     cursor: pointer;
 }
 
-#difficultyModal {
+.difficultyModal {
     display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--bg);
-    color: var(--text);
-    border-radius: 10px;
-    padding: 30px;
-    box-shadow: 0 0 20px rgba(0, 123, 255, 0.3);
-    z-index: 999;
-    flex-direction: column;
-    gap: 15px;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(128, 128, 128, 0.2);
+    backdrop-filter: blur(2px);
+    justify-content: center;
     align-items: center;
-}
+    position: absolute;
 
-#difficultyModal button {
-    padding: 10px 20px;
-    font-size: 18px;
-    border-radius: 6px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
+    #difficultyModal {
+        width: 320px;
+        height: 320px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: var(--bg);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 0 20px rgba(0, 123, 255, 0.3);
+        z-index: 999;
+        gap: 15px;
 
-#difficultyModal button:hover {
-    background-color: #0056b3;
+        span {
+            position: relative;
+            top: -15px;
+            left: 140px;
+            cursor: pointer;
+        }
+
+        button {
+            width: 120px;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 6px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+
+            &:hover {
+                background-color: #0056b3;
+            }
+        }
+    }
 }
 
 #hud {
@@ -140,8 +270,8 @@ body.dark {
 }
 
 .game {
+    display: none;
     width: 100vw;
-    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;

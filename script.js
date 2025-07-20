@@ -1,5 +1,4 @@
-/* -------------------Importações----------------------- */
-
+document.getElementById("displayNameForm").style.display = "flex";
 
 /* ----------------- Variáveis e constantes ----------------- */
 const root = document.querySelector("#root");
@@ -32,18 +31,16 @@ function shuffle(array) {
     return array;
 }
 
-function updateHighScoreDisplay() {
-    document.getElementById("highScoreDisplay").textContent = `Maior pontuação: ${highScore}`;
+async function updateHighScoreDisplay() {
+    document.getElementById("highScoreDisplay").textContent = `${highScore}`;
 }
 
 // Sistema de Register/Login
 
-const API_URL = "http://localhost:3000/api"; // ou seu backend hospedado
-let currentUser = null;
+const API_URL = "http://192.168.1.15:3000/api";
+let currentUser = localStorage.getItem("user");
 let accessToken = localStorage.getItem("token");
-
-// Exibe HUD com nome se já logado
-if (accessToken) getUser();
+let sessionId = localStorage.getItem("sessionId");
 
 async function handleRegister() {
     const email = document.getElementById("email").value;
@@ -67,42 +64,118 @@ async function handleLogin() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
     });
+
     const data = await res.json();
 
     if (data.session?.access_token) {
         accessToken = data.session.access_token;
+        sessionId = data.user.id;
         localStorage.setItem("token", accessToken);
-        currentUser = data.session.user.email;
+        localStorage.setItem("sessionId", sessionId);
+
         document.getElementById("authModal").style.display = "none";
+        document.querySelector(".sessionMenu").style.display = "flex"
+        loadingInfoPlayer()
         updateHUDUser();
+        loadRanking();
     } else {
-        alert(data.error);
+        console.error("Erro na resposta de login:", data);
+        alert(data.error || "Erro ao logar");
     }
+
 }
 
-async function getUser() {
-    const res = await fetch("https://YOUR_PROJECT.supabase.co/auth/v1/user", {
-        headers: { Authorization: `Bearer ${accessToken}` }
+async function setDisplayName() {
+    const name = document.getElementById("displayNameInput").value;
+
+    const res = await fetch(`${API_URL}/player`, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ displayName: name })
     });
+
     const data = await res.json();
-    if (data?.email) {
-        currentUser = data.email;
-        document.getElementById("authModal").style.display = "none";
-        updateHUDUser();
-    }
+    alert(data.message || data.error);
+    loadingInfoPlayer()
+    updateHUDUser();
+    loadRanking(); // Atualiza o ranking depois
+}
+
+async function loadingInfoPlayer() {
+    const res = await fetch(`${API_URL}/userName`, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    const data = await res.json();
+    data.map(item => {
+        if (item.id === sessionId) {
+            currentUser = item.usuario || "Desconhecido";
+            localStorage.setItem("user", currentUser);
+        }
+    })
+
 }
 
 function updateHUDUser() {
     const hud = document.getElementById("hud");
     let userLabel = document.getElementById("userLabel");
+
     if (!userLabel) {
         userLabel = document.createElement("span");
         userLabel.id = "userLabel";
         hud.insertBefore(userLabel, hud.firstChild);
     }
+
     userLabel.innerHTML = `<strong>Usuário:</strong> ${currentUser}`;
+    document.getElementById("displayNameForm").style.display = "block";
 }
 
+
+async function loadRanking() {
+    const res = await fetch(`${API_URL}/ranking`);
+    const data = await res.json();
+
+    if (!Array.isArray(data)) {
+        console.error("Erro ao carregar ranking:", data);
+        return;
+    }
+
+    const list = document.getElementById("rankingList");
+    list.innerHTML = "";
+
+    data.forEach((item, i) => {
+        list.innerHTML += `<li>#${i + 1} ${item.username || item.email} - ${item.points} pts - ${item.time}s</li>`;
+    });
+}
+
+
+document.addEventListener("DOMContentLoaded", loadRanking);
+
+function logout() {
+    accessToken = null;
+    currentUser = null;
+    sessionId = null;
+
+    localStorage.removeItem("sessionId");
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+
+    // Esconde HUD, mostra modal de login
+    document.getElementById("authModal").style.display = "flex";
+    document.querySelector(".sessionMenu").style.display = "none"
+
+    const label = document.getElementById("userLabel");
+    if (label) label.remove();
+
+    alert("Você saiu da conta.");
+}
 
 /* ----------------- Timer ----------------- */
 function startTimer() {
@@ -398,14 +471,12 @@ function checkVictory() {
 /* ----------------- Tema claro/escuro ----------------- */
 function toggleTheme() {
     const isDark = document.body.classList.toggle("dark");
-    document.querySelector("#home").setAttribute("style", isDark ? "color: white" : "color: black");
     btnTgTheme.innerHTML = "";
 
     const icon = document.createElement("i");
     icon.setAttribute("data-lucide", isDark ? "sun" : "moon");
     icon.style.color = isDark ? "white" : "black"
     btnTgTheme.appendChild(icon)
-
 
     lucide.createIcons();
 }
@@ -415,17 +486,20 @@ function goToMenu() {
     stopTimer();
     root.innerHTML = "";
     document.getElementById("number-buttons").innerHTML = "";
-    document.getElementById("menu").style.display = "flex";
+    document.querySelector(".sessionMenu").style.display = "flex";
     document.getElementById("hud").style.display = "none";
     document.getElementById("root").style.display = "none";
+
+    loadRanking();
 }
 
 document.getElementById("btnStart").addEventListener("click", () => {
-    document.getElementById("difficultyModal").style.display = "flex";
+    document.querySelector(".difficultyModal").style.display = "flex";
 });
 
 function startGame(difficultyKey) {
-    document.getElementById("difficultyModal").style.display = "none";
+    document.querySelector(".difficultyModal").style.display = "none";
+    document.querySelector(".game").style.display = "flex"
 
     // guarda limites conforme dificuldade
     const { holes, maxErrors: me } = DIFFICULTIES[difficultyKey];
@@ -439,7 +513,7 @@ function startGame(difficultyKey) {
     updateErrors();
 
     // UI: esconde menu, mostra HUD
-    document.getElementById("menu").style.display = "none";
+    document.querySelector(".sessionMenu").style.display = "none";
     document.getElementById("hud").style.display = "flex";
     document.getElementById("root").style.display = "block";
 
@@ -461,7 +535,20 @@ window.addEventListener("keydown", e => {
     }
 });
 
+const closeDifficultyModal = () => {
+    document.querySelector(".difficultyModal").style.display = "none";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     updateHighScoreDisplay();
     lucide.createIcons();
 });
+
+accessToken = localStorage.getItem("token");
+if (accessToken) {
+    document.getElementById("authModal").style.display = "none";
+    document.querySelector(".sessionMenu").style.display = "flex"
+    loadingInfoPlayer()
+    updateHUDUser()
+    loadRanking();
+}

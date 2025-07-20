@@ -20,18 +20,35 @@
         <button onclick="handleRegister()">Cadastrar</button>
     </div>
 
-
-    <div id="menu">
-        <button id="btnStart">Iniciar Jogo</button>
-        <p id="highScoreDisplay">Maior pontuação: 0</p>
-        <button id="tgTheme" onclick="toggleTheme()"><i data-lucide="moon"></i></button>
+    <div class="sessionMenu">
+        <div class="leftMenu">
+            <div id="menu">
+                <button id="tgTheme" onclick="toggleTheme()"><i data-lucide="moon"></i></button>
+                <div id="displayNameForm" style="margin-top: 10px;">
+                    <input id="displayNameInput" placeholder="Seu nome de exibição" />
+                    <button onclick="setDisplayName()">Salvar</button>
+                </div>
+                <button id="btnStart">Iniciar Jogo</button>
+                <button class="logout" onclick="logout()" title="Sair"><i data-lucide="log-out"></i></button>
+            </div>
+            <p class="highScoreDisplay" id="highScoreDisplay"></p>
+        </div>
+        <div class="rigthMenu">
+            <div id="ranking">
+                <h3>🏆 Top Jogadores</h3>
+                <ol id="rankingList"></ol>
+            </div>
+        </div>
     </div>
 
-    <div id="difficultyModal">
-        <p>Escolha a Dificuldade</p>
-        <button onclick="startGame('easy')">Fácil</button>
-        <button onclick="startGame('medium')">Médio</button>
-        <button onclick="startGame('hard')">Difícil</button>
+    <div class="difficultyModal">
+        <div id="difficultyModal">
+            <span onclick="closeDifficultyModal()">X</span>
+            <p>Escolha a Dificuldade</p>
+            <button onclick="startGame('easy')">Fácil</button>
+            <button onclick="startGame('medium')">Médio</button>
+            <button onclick="startGame('hard')">Difícil</button>
+        </div>
     </div>
 
     <div class="game">
@@ -39,9 +56,7 @@
             <span><strong>Tempo:</strong> <span id="timer">00:00</span></span>
             <span><strong>Pontuação:</strong> <span id="score">100</span></span>
             <span><strong>Erros:</strong> <span id="errors">0</span></span>
-            <button id="home" onclick="goToMenu()" title="Voltar ao menu">
-                <i data-lucide="home"></i>
-            </button>
+            <button id="home" onclick="goToMenu()" title="Voltar ao menu"><i data-lucide="home"></i></button>
         </div>
         <div id="root"></div>
         <div id="number-buttons"></div>
