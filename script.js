@@ -39,7 +39,7 @@ async function updateHighScoreDisplay() {
 }
 
 /* ----------------- AUTENTICAÇÃO ----------------- */
-const API_URL = "https://sudoku-backend-gamma.vercel.app/api";
+const API_URL = "https:///api";
 let currentUser = localStorage.getItem("user");
 let accessToken = localStorage.getItem("token");
 let sessionId = localStorage.getItem("sessionId");
