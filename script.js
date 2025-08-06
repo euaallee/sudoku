@@ -555,7 +555,7 @@ async function checkVictory() {
                 console.log("Pontuação registrada!");
             }
         } catch (err) {
-            .error("Erro de rede ao salvar score:", err);
+            console.error("Erro de rede ao salvar score:", err);
         }
     }
 
@@ -648,6 +648,7 @@ if (!accessToken) {
     updateHUDUser();
     loadRanking();
 }
+
 
 
 
