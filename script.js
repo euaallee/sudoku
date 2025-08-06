@@ -39,7 +39,7 @@ async function updateHighScoreDisplay() {
 }
 
 /* ----------------- AUTENTICAÇÃO ----------------- */
-const API_URL = "https://sudoku-backend-tau.vercel.app//api";
+const API_URL = "https://sudoku-backend-tau.vercel.app/api";
 let currentUser = localStorage.getItem("user");
 let accessToken = localStorage.getItem("token");
 let sessionId = localStorage.getItem("sessionId");
@@ -133,7 +133,6 @@ async function updateJogadasRestantes() {
     });
 
     const data = await res.json();
-    console.log(data)
     if (res.ok) {
         document.getElementById("jogadasRestantes").innerHTML = `<strong>Jogadas:</strong> ${data.restantes}`;
         // Desativa botão de anúncio se já assistiu
@@ -535,7 +534,7 @@ async function checkVictory() {
 
             const data = await res.json();
             if (!res.ok) {
-                console.error("Erro ao registrar pontuação:", data.error);
+                .error("Erro ao registrar pontuação:", data.error);
                 document.querySelector(".sessionMenu").style.display = "none";
 
                 const ad = document.getElementById("ad");
@@ -553,10 +552,10 @@ async function checkVictory() {
                 ad.appendChild(avisoAd);
 
             } else {
-                console.log("Pontuação registrada!");
+                .log("Pontuação registrada!");
             }
         } catch (err) {
-            console.error("Erro de rede ao salvar score:", err);
+            .error("Erro de rede ao salvar score:", err);
         }
     }
 
@@ -649,4 +648,5 @@ if (!accessToken) {
     updateHUDUser();
     loadRanking();
 }
+
 
