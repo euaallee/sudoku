@@ -24,6 +24,8 @@ let maxErrors = 5;
 let userInputs = {};
 let highScore = localStorage.getItem("sudokuHighScore") || 0;
 let isDarkTheme = localStorage.getItem("theme") === "true";
+let jogadasRestantes = 0;
+let podeAssistirAnuncio = false;
 
 /* ----------------- UTILIDADES ----------------- */
 function shuffle(array) {
@@ -134,13 +136,16 @@ async function updateJogadasRestantes() {
 
     const data = await res.json();
     if (res.ok) {
-        document.getElementById("jogadasRestantes").innerHTML = `<strong>Jogadas:</strong> ${data.restantes}`;
-        // Desativa botão de anúncio se já assistiu
+        jogadasRestantes = data.restantes;
+        podeAssistirAnuncio = data.podeAssistir;
+
+        document.getElementById("jogadasRestantes").innerHTML = `<strong>Jogadas:</strong> ${jogadasRestantes}`;
+
         const adButton = document.querySelector("#ad button");
         if (adButton) {
-            adButton.disabled = !data.podeAssistir;
-            adButton.textContent = data.podeAssistir ? "Assistir Anúncio" : "Anúncio já assistido";
-            adButton.style.opacity = data.podeAssistir ? "1" : "0.5";
+            adButton.disabled = !podeAssistirAnuncio;
+            adButton.textContent = podeAssistirAnuncio ? "Assistir Anúncio" : "Anúncio já assistido";
+            adButton.style.opacity = podeAssistirAnuncio ? "1" : "0.5";
         }
     }
 }
@@ -218,6 +223,7 @@ async function registrarAnuncioAssistido() {
 
         if (res.ok) {
             alert("✅ Anúncio contabilizado! Você ganhou +5 jogadas hoje.");
+            await updateJogadasRestantes();
         } else {
             alert(`❌ ${data.error || "Erro ao registrar anúncio."}`);
         }
@@ -226,7 +232,6 @@ async function registrarAnuncioAssistido() {
         alert("Erro de conexão ao registrar anúncio.");
     }
 }
-
 
 function logout() {
     accessToken = null;
@@ -592,7 +597,41 @@ function goToMenu() {
     loadRanking();
 }
 
-document.getElementById("btnStart").addEventListener("click", () => {
+function openPlayLimitModal() {
+    const modal = document.getElementById("playLimitModal");
+    modal.style.display = "flex";
+
+    const adBtn = document.getElementById("watchAdBtn");
+    const adInfoText = document.getElementById("adInfoText");
+
+    if (podeAssistirAnuncio) {
+        adBtn.disabled = false;
+        adBtn.style.display = "inline-block";
+        adBtn.onclick(() => {
+            console.log("Clicado")
+            closePlayLimitModal();
+            mostrarAnuncio();
+        });
+        adInfoText.textContent = "Você pode assistir um anúncio para liberar +5 jogadas extras.";
+    } else {
+        adBtn.disabled = true;
+        adBtn.style.display = "none";
+        adInfoText.textContent = "Você já assistiu um anúncio hoje. Volte amanhã para mais jogadas!";
+    }
+}
+
+function closePlayLimitModal() {
+    document.getElementById("playLimitModal").style.display = "none";
+}
+
+document.getElementById("btnStart").addEventListener("click", async () => {
+    await updateJogadasRestantes();
+
+    if (jogadasRestantes <= 0) {
+        openPlayLimitModal();
+        return;
+    }
+
     document.querySelector(".difficultyModal").style.display = "flex";
 });
 
@@ -648,7 +687,3 @@ if (!accessToken) {
     updateHUDUser();
     loadRanking();
 }
-
-
-
-
