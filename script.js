@@ -534,7 +534,7 @@ async function checkVictory() {
 
             const data = await res.json();
             if (!res.ok) {
-                .error("Erro ao registrar pontuação:", data.error);
+                console.error("Erro ao registrar pontuação:", data.error);
                 document.querySelector(".sessionMenu").style.display = "none";
 
                 const ad = document.getElementById("ad");
@@ -552,7 +552,7 @@ async function checkVictory() {
                 ad.appendChild(avisoAd);
 
             } else {
-                .log("Pontuação registrada!");
+                console.log("Pontuação registrada!");
             }
         } catch (err) {
             .error("Erro de rede ao salvar score:", err);
@@ -648,5 +648,6 @@ if (!accessToken) {
     updateHUDUser();
     loadRanking();
 }
+
 
 
