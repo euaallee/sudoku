@@ -39,7 +39,7 @@ async function updateHighScoreDisplay() {
 }
 
 /* ----------------- AUTENTICAÇÃO ----------------- */
-const API_URL = "https:///api";
+const API_URL = "https://sudoku-backend-tau.vercel.app//api";
 let currentUser = localStorage.getItem("user");
 let accessToken = localStorage.getItem("token");
 let sessionId = localStorage.getItem("sessionId");
@@ -649,3 +649,4 @@ if (!accessToken) {
     updateHUDUser();
     loadRanking();
 }
+
