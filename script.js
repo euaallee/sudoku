@@ -102,7 +102,6 @@ async function setDisplayName() {
     const data = await res.json();
     alert(data.message || data.error);
     loadingInfoPlayer();
-    updateHUDUser();
     loadRanking();
 }
 
@@ -120,8 +119,31 @@ async function loadingInfoPlayer() {
         if (item.id === sessionId) {
             currentUser = item.usuario || "Desconhecido";
             localStorage.setItem("user", currentUser);
+            updateHUDUser();
         }
     });
+}
+
+async function updateJogadasRestantes() {
+    const res = await fetch(`${API_URL}/play`, {
+        headers: {
+            "Authorization": `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    const data = await res.json();
+    console.log(data)
+    if (res.ok) {
+        document.getElementById("jogadasRestantes").innerHTML = `<strong>Jogadas:</strong> ${data.restantes}`;
+        // Desativa botão de anúncio se já assistiu
+        const adButton = document.querySelector("#ad button");
+        if (adButton) {
+            adButton.disabled = !data.podeAssistir;
+            adButton.textContent = data.podeAssistir ? "Assistir Anúncio" : "Anúncio já assistido";
+            adButton.style.opacity = data.podeAssistir ? "1" : "0.5";
+        }
+    }
 }
 
 function updateHUDUser() {
@@ -134,7 +156,6 @@ function updateHUDUser() {
     }
     userLabel.innerHTML = `<strong>Usuário:</strong> ${currentUser}`;
     document.getElementById("displayNameForm").style.display = "block";
-    loadingInfoPlayer()
 }
 
 async function loadRanking() {
@@ -147,9 +168,66 @@ async function loadRanking() {
     data.forEach((item, i) => {
         const minutes = Math.floor(item.time / 60);
         const seconds = item.time % 60;
-        list.innerHTML += `<li>#${i + 1} ${item.username || item.email} - ${item.points} pts - ${minutes}min ${seconds}s</li>`;
+        list.innerHTML += `
+        <li>
+            <div class="bodyRanking">
+                <span>#${i + 1}</span>
+                <div class="infoRanking">
+                    <h3>${item.username || item.email}</h3>
+                    <p>${item.points} pts</p>
+                    <span>${minutes}min ${seconds}s</span>
+                </div>
+            </div>
+        </li>`;
     });
+
+    await updateJogadasRestantes();
 }
+
+function mostrarAnuncio() {
+    let segundos = 5;
+    const adModal = document.getElementById("adModal");
+    const timer = document.getElementById("timer");
+
+    adModal.style.display = "flex";
+    document.getElementById("ad").style.display = "none";
+    timer.innerText = segundos;
+
+    const intervalo = setInterval(() => {
+        segundos--;
+        timer.innerText = segundos;
+
+        if (segundos <= 0) {
+            clearInterval(intervalo);
+            adModal.style.display = "none";
+            registrarAnuncioAssistido();
+        }
+    }, 1000);
+}
+
+async function registrarAnuncioAssistido() {
+    try {
+        const res = await fetch(`${API_URL}/registerAd`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${accessToken}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            alert("✅ Anúncio contabilizado! Você ganhou +5 jogadas hoje.");
+        } else {
+            alert(`❌ ${data.error || "Erro ao registrar anúncio."}`);
+        }
+    } catch (err) {
+        console.error("Erro de rede ao registrar anúncio:", err);
+        alert("Erro de conexão ao registrar anúncio.");
+    }
+}
+
 
 function logout() {
     accessToken = null;
@@ -274,7 +352,12 @@ function createSmallBlock(parent, row, col, value) {
         cell.textContent = value;
         cell.classList.add("fixed");
     } else {
-        cell.addEventListener("click", () => { selectedCell = cell; });
+        cell.addEventListener("click", () => {
+            document.querySelectorAll(".select-block").forEach(c => c.classList.remove("selected"));
+
+            selectedCell = cell;
+            cell.classList.add("selected");
+        });
     }
 
     cell.addEventListener("mouseover", () => highlightAxis(row, col, true));
@@ -284,7 +367,7 @@ function createSmallBlock(parent, row, col, value) {
 
 function createBlock(parent, blockIndex, puzzle) {
     const block = document.createElement("div");
-    block.style.border = "2px solid #000";
+    block.style.border = `2px solid gray`;
     block.style.display = "inline-grid";
     block.style.gridTemplateColumns = "repeat(3, 66px)";
     block.style.gridTemplateRows = "repeat(3, 66px)";
@@ -304,7 +387,7 @@ function createBlock(parent, blockIndex, puzzle) {
 function createSquare(puzzle) {
     root.innerHTML = "";
     const square = document.createElement("div");
-    square.style.border = "3px solid #000";
+    square.style.border = `1px solid gray`;
     square.style.display = "grid";
     square.style.gridTemplateColumns = "repeat(3, 200px)";
     square.style.gridTemplateRows = "repeat(3, 200px)";
@@ -331,11 +414,24 @@ function createNumberButtons() {
         btn.addEventListener("click", () => handleNumberClick(i));
         container.appendChild(btn);
     }
+
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "⌫";
+    delBtn.classList.add("num-btn");
+    delBtn.style.backgroundColor = "#dc3545";
+    delBtn.style.fontWeight = "bold";
+    delBtn.onclick = () => {
+        if (!selectedCell || selectedCell.classList.contains("fixed")) return;
+        selectedCell.textContent = "";
+        checkUsedNumbers();
+    };
+    container.appendChild(delBtn);
     checkUsedNumbers();
 }
 
 function handleNumberClick(num) {
     if (!selectedCell || selectedCell.classList.contains("fixed")) return;
+
     const row = +selectedCell.dataset.row;
     const col = +selectedCell.dataset.col;
     const key = `${row}-${col}`;
@@ -346,21 +442,28 @@ function handleNumberClick(num) {
     if (num === solution[row][col]) {
         selectedCell.textContent = num;
         selectedCell.style.color = "blue";
-        delete userInputs[key];
+
+        if (userInputs[key]?.wasWrong) {
+            delete userInputs[key];
+        }
+
         updateScore(10 - Math.floor(seconds / 30));
         checkFullLinesAndBlocks();
         checkVictory();
         checkUsedNumbers();
     } else {
-        if (userInputs[key]?.wasWrong) return;
         selectedCell.textContent = num;
         selectedCell.style.color = "red";
         updateScore(-5);
-        errors++;
-        updateErrors();
-        userInputs[key] = { wasWrong: true };
+
+        if (!userInputs[key]?.wasWrong) {
+            errors++;
+            updateErrors();
+            userInputs[key] = { wasWrong: true };
+        }
     }
 }
+
 
 function checkUsedNumbers() {
     const usedCount = Array(10).fill(0);
@@ -404,7 +507,7 @@ function checkFullLinesAndBlocks() {
     }
 }
 
-function checkVictory() {
+async function checkVictory() {
     const cells = document.querySelectorAll(".select-block");
     for (const cell of cells) {
         const { row, col } = cell.dataset;
@@ -420,14 +523,41 @@ function checkVictory() {
     }
 
     if (accessToken) {
-        fetch(`${API_URL}/score`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${accessToken}`
-            },
-            body: JSON.stringify({ points: score, timeInSeconds: seconds })
-        });
+        try {
+            const res = await fetch(`${API_URL}/score`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({ points: score, time_in_seconds: seconds })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                console.error("Erro ao registrar pontuação:", data.error);
+                document.querySelector(".sessionMenu").style.display = "none";
+
+                const ad = document.getElementById("ad");
+                ad.style.display = "flex";
+                const avisoAd = document.createElement("div");
+                const btnAd = document.createElement("button");
+                avisoAd.classList.add("avisoAd");
+                btnAd.innerText = "Assistir Anúncio";
+                btnAd.addEventListener("click", () => {
+                    mostrarAnuncio();
+                });
+
+                avisoAd.innerHTML += `<p>${data.error}</p>`;
+                avisoAd.appendChild(btnAd);
+                ad.appendChild(avisoAd);
+
+            } else {
+                console.log("Pontuação registrada!");
+            }
+        } catch (err) {
+            console.error("Erro de rede ao salvar score:", err);
+        }
     }
 
     document.getElementById("win-sound").play();
@@ -508,10 +638,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isDarkTheme) document.body.classList.add("dark");
 });
 
-if (accessToken) {
+if (!accessToken) {
+    alert("Sessão finalizada!")
+    document.querySelector("#authModal").style.display = "flex";
+    document.querySelector(".sessionMenu").style.display = "none";
+    localStorage.removeItem("token");
+} else {
     document.getElementById("authModal").style.display = "none";
     document.querySelector(".sessionMenu").style.display = "flex";
-    loadingInfoPlayer();
     updateHUDUser();
     loadRanking();
 }

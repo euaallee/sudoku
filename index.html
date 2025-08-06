@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SUDOKU LITE</title>
     <link rel="stylesheet" href="style.css">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7246422966217785"
+        crossorigin="anonymous"></script>
     <script src="script.js" defer></script>
     <audio id="win-sound" src="./sound/GameWin.mp3"></audio>
     <audio id="fail-sound" src="./sound/GameOver.mp3"></audio>
@@ -25,7 +27,8 @@
             <div id="menu">
                 <button id="tgTheme" onclick="toggleTheme()"></button>
                 <div id="displayNameForm" style="margin-top: 10px;">
-                    <input id="displayNameInput" placeholder="Seu nome de exibição" />
+                    <input required minlength="3" maxlength="16" id="displayNameInput"
+                        placeholder="Seu nome de exibição" />
                     <button onclick="setDisplayName()">Salvar</button>
                 </div>
                 <button id="btnStart">Iniciar Jogo</button>
@@ -54,13 +57,27 @@
     <div class="game">
         <div id="hud">
             <button id="home" onclick="goToMenu()" title="Voltar ao menu"><i data-lucide="home"></i></button>
+            <button id="tgTheme" onclick="toggleTheme()"><i data-lucide="moon"></i></button>
             <span><strong>Tempo:</strong> <span id="timer">00:00</span></span>
             <span><strong>Pontuação:</strong> <span id="score">100</span></span>
             <span><strong>Erros:</strong> <span id="errors">0</span></span>
+            <span id="jogadasRestantes"><strong>Jogadas:</strong> --</span>
+
         </div>
         <div id="root"></div>
         <div id="number-buttons"></div>
     </div>
+
+    <div id="ad"></div>
+
+    <div id="adModal"
+        style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#000a;color:white;justify-content:center;align-items:center;z-index:999;">
+        <div>
+            <h3>Anúncio em execução...</h3>
+            <span id="timer">5</span>
+        </div>
+    </div>
+
 </body>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>

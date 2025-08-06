@@ -189,12 +189,46 @@ body.dark {
             color: var(--text);
 
             #rankingList {
+                margin-top: 20px;
                 list-style: none;
                 padding: 0;
 
                 li {
                     margin: 5px 0;
                     font-weight: bold;
+
+                    .bodyRanking {
+                        width: 340px;
+                        padding: 10px 15px;
+                        background-color: var(--bg);
+                        display: flex;
+                        flex-direction: row;
+                        gap: 20px;
+                        border: 1px solid var(--text);
+                        border-radius: 8px;
+                        align-items: center;
+                        
+                        span {
+                            font-size: 32px;
+                        }
+                        
+                        .infoRanking {
+                            padding-left: 5px;
+                            border-left: 1px solid var(--text);
+                            display: flex;
+                            flex-direction: column;
+                            align-items: start;
+                            gap: 3px;
+
+                            h3 {
+                                font-size: 28px;
+                            }
+
+                            span {
+                                font-size: 14px;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -249,6 +283,19 @@ body.dark {
     }
 }
 
+#ad {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(3px);
+    background-color: #a7a7a75b;
+
+    .avisoAd {}
+}
+
 .game {
     display: none;
     width: 100vw;
@@ -283,6 +330,18 @@ body.dark {
                 padding: 5px 10px;
             }
         }
+
+        #tgTheme {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text);
+
+        }
     }
 
     #root {
@@ -304,11 +363,16 @@ body.dark {
                 background-color: rgb(253, 219, 180);
                 color: black;
             }
+
+            &.selected {
+                outline: 3px solid #007bff;
+                outline-offset: -2px;
+            }
         }
 
         .highlight-x[data-col],
         .highlight-y[data-row] {
-            background-color: rgba(253, 219, 180, 0.4) !important;
+            background-color: rgb(171, 204, 247) !important;
         }
     }
 
@@ -319,6 +383,7 @@ body.dark {
         flex-wrap: wrap;
         gap: 10px;
         width: 100%;
+        margin-bottom: 30px;
 
         .num-btn {
             padding: 10px 20px;
@@ -354,6 +419,8 @@ body.dark {
                     }
 
                     &::after {
+                        pointer-events: none;
+                        cursor: none;
                         position: absolute;
                         top: 50%;
                         left: 50%;
@@ -371,7 +438,19 @@ body.dark {
         }
 
         .rightMenu {
-            border-top: 1px var(--text) solid;
+
+            #ranking {
+
+                #rankingList {
+
+                    li {
+
+                        .bodyRanking {
+                            border: none;
+                        }
+                    }
+                }
+            }
         }
     }
 
