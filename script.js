@@ -140,13 +140,6 @@ async function updateJogadasRestantes() {
         podeAssistirAnuncio = data.podeAssistir;
 
         document.getElementById("jogadasRestantes").innerHTML = `<strong>Jogadas:</strong> ${jogadasRestantes}`;
-
-        const adButton = document.querySelector("#ad button");
-        if (adButton) {
-            adButton.disabled = !podeAssistirAnuncio;
-            adButton.textContent = podeAssistirAnuncio ? "Assistir Anúncio" : "Anúncio já assistido";
-            adButton.style.opacity = podeAssistirAnuncio ? "1" : "0.5";
-        }
     }
 }
 
@@ -194,7 +187,6 @@ function mostrarAnuncio() {
     const timer = document.getElementById("timer");
 
     adModal.style.display = "flex";
-    document.getElementById("ad").style.display = "none";
     timer.innerText = segundos;
 
     const intervalo = setInterval(() => {
@@ -607,7 +599,7 @@ function openPlayLimitModal() {
     if (podeAssistirAnuncio) {
         adBtn.disabled = false;
         adBtn.style.display = "inline-block";
-        adBtn.onclick(() => {
+        adBtn.addEventListener("click", () => {
             console.log("Clicado")
             closePlayLimitModal();
             mostrarAnuncio();
